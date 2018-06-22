@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.UserCollectionDAO">
+    <resultMap id="userCollectionMap" type="com.dt.vo.UserCollectionVo"></resultMap>
+    <resultMap id="userVedioMap" type="com.dt.vo.UserCollectionVo">
+        <id column="id" property="id"></id>
+        <result column="vedio_id" property="vedioId"></result>
+        <association property="vedioVo" javaType="com.dt.vo.VedioVo">
+            <result column="title" property="title"></result>
+            <result column="face_img" property="faceImg"></result>
+            <result column="description" property="description"></result>
+            <result column="rate" property="rate"></result>
+            <result column="vedio_module_id" property="vedioModuleId"></result>
+            <result column="vedio_type_id" property="vedioTypeId"></result>
+            <result column="jishu" property="jishu"></result>
+            <result column="is_vip" property="isVip"></result>
+            <result column="is_last" property="isLast"></result>
+            <result column="is_active" property="isActive"></result>
+            <result column="create_time" property="createTime"></result>
+        </association>
+    </resultMap>
+    <select id="getById" resultMap="userCollectionMap" parameterType="long">
+        select * from t_user_collection where id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_user_collection where id = #{id}
+    </delete>
+    <delete id="deleteById" parameterType="long">
+        delete from t_user_collection where vedio_id = #{vedioId} and user_id=#{userId}
+    </delete>
+    <select id="listPage" resultMap="userCollectionMap">
+        select * from t_user_collection order by create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="listAll" resultMap="userCollectionMap">
+        select * from t_user_collection
+    </select>
+    <select id="getList" resultMap="userVedioMap">
+        select t.id,t.vedio_id,v.id,v.face_img,v.title,v.is_last,v.vedio_type_id,v.vedio_module_id,v.is_vip,v.jishu,v.rate,v.description,v.create_time  from t_user_collection t,t_vedio v where t.vedio_id=v.id and t.user_id=#{userId} and t.is_active=0
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from t_user_collection
+    </select>
+    <insert id="save" parameterType="userCollectionVo">
+        insert into t_user_collection ( user_id,vedio_id,is_active,create_time) values ( #{userId},#{vedioId},#{isActive},#{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_user_collection set is_active=#{status} where id=#{id}
+    </update>
+</mapper>

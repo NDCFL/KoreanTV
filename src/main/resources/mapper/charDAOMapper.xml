@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.CharDAO">
+    <resultMap id="charMap" type="com.dt.vo.CharVo">
+        <id column="id" property="id"></id>
+        <result column="content" property="content"></result>
+        <result column="create_time" property="createTime"></result>
+        <association property="userVo" javaType="com.dt.vo.AppUserVo">
+            <result column="name" property="name"></result>
+            <result column="face_img" property="faceImg"></result>
+        </association>
+    </resultMap>
+    <select id="getById" resultMap="charMap" parameterType="long">
+        select t.*,a.name,a.face_img from t_char t,t_app_user a where t.user_id=a.id and id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_char where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="charMap">
+        select t.*,a.name,a.face_img from t_char t,t_app_user a where t.user_id=a.id and t.vedio_discuss_id=#{id} order by t.create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <sql id="find">
+        <if test="charVo.createTime!=null"> and t.create_time BETWEEN #{charVo.createTime} AND #{charVo.endTime}</if>
+        <if test="charVo.userName!=null">and a.name like concat('%${charVo.userName}%')</if>
+        <if test="charVo.content!=null">and t.content like concat('%${charVo.content}%')</if>
+    </sql>
+    <select id="listPages" resultMap="charMap">
+        select t.*,a.name,a.face_img from t_char t,t_app_user a where t.user_id=a.id and t.vedio_discuss_id=#{charVo.vedioDiscussId} <include refid="find"></include> order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+    </select>
+    <select id="counts" resultType="java.lang.Long">
+        select count(t.id) from  t_char t,t_app_user a where t.user_id=a.id and t.vedio_discuss_id=#{charVo.vedioDiscussId} <include refid="find"></include>
+    </select>
+    <select id="listAll" resultMap="charMap">
+        select * from t_char
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from  t_char t,t_app_user a where t.user_id=a.id and t.vedio_discuss_id=#{id}
+    </select>
+    <insert id="save" parameterType="charVo">
+        insert into t_char (user_id,vedio_discuss_id,content,is_active,create_time) values ( #{userId},#{vedioDiscussId},#{content},#{isActive},now())
+    </insert>
+    <update id="updateStatus">
+        update t_char set is_active=#{status} where id=#{id}
+    </update>
+</mapper>

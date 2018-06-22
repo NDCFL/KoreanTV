@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.UserNewsDAO">
+	<resultMap id="userNewsMap" type="com.dt.vo.UserNewsVo">
+		<id column="id" property="id"></id>
+		<result column="user_id" property="userId"></result>
+		<result column="content" property="content"></result>
+		<result column="is_active" property="isActive"></result>
+		<result column="create_time" property="createTime"></result>
+		<result column="img_url" property="imgUrl"></result>
+		<result column="cnt" property="cnt"></result>
+		<result column="pl" property="pl"></result>
+		<result column="isGood" property="isGood"></result>
+		<association property="userVo" javaType="com.dt.vo.AppUserVo">
+			<result column="name" property="name"></result>
+			<result column="face_img" property="faceImg"></result>
+			<result column="phone" property="phone"></result>
+			<result column="remark" property="remark"></result>
+		</association>
+	</resultMap>
+	<select id="getById" resultMap="userNewsMap" parameterType="long">
+		select t.*,u.name,u.face_img,u.phone,u.remark,(select count(id) from t_user_news_good where user_news_id=t.id) as cnt,(select count(id) from t_user_news_pl where user_news_id=t.id) as pl from t_user_news t,t_app_user u where t.user_id=u.id and  t.id = #{id}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_user_news where id = #{id}
+	</delete>
+	<select id="listPage" resultMap="userNewsMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark,(select count(id) from t_user_news_good where user_news_id=t.id) as cnt,(select count(id) from t_user_news_pl where user_news_id=t.id) as pl from t_user_news t,t_app_user u where t.user_id=u.id  order by t.create_time desc limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="userNewsMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark,(select count(id) from t_user_news_good where user_news_id=t.id) as cnt,(select count(id) from t_user_news_pl where user_news_id=t.id) as pl from t_user_news t,t_app_user u where t.user_id=u.id
+	</select>
+	<select id="count" resultType="java.lang.Long">
+		select count(t.id) from t_user_news t,t_app_user u where t.user_id=u.id
+	</select>
+	<sql id="find">
+		<if test="userNewsVo.createTime!=null and userNewsVo.endTime!=null"> and t.create_time BETWEEN #{userNewsVo.createTime} AND #{userNewsVo.endTime}</if>
+		<if test="userNewsVo.userId!=null">and t.user_id=#{userNewsVo.userId}</if>
+		<if test="userNewsVo.userName!=null and userNewsVo.userName!=''">and u.name like concat('%${userNewsVo.userName}%')</if>
+		<if test="userNewsVo.content!=null and userNewsVo.content!=''">and t.content like concat('%${userNewsVo.content}%')</if>
+		<if test="userNewsVo.isActive!=null">and t.is_active like concat('%${userNewsVo.isActive}%')</if>
+	</sql>
+	<select id="findUserNewsList" resultMap="userNewsMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark,(select count(id) from t_user_news_good where user_news_id=t.id) as cnt,(select count(id) from t_user_news_pl where user_news_id=t.id) as pl,(select count(id) from t_user_news_good where user_id=#{userNewsVo.currentUserId} and user_news_id=t.id) as isGood from t_user_news t,t_app_user u where t.user_id=u.id <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+	</select>
+	<select id="yourUserNewsList" resultMap="userNewsMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark,(select count(id) from t_user_news_good where user_news_id=t.id) as cnt,(select count(id) from t_user_news_pl where user_news_id=t.id) as pl,(select count(id) from t_user_news_good where user_id=#{userNewsVo.currentUserId} and user_news_id=t.id) as isGood from t_user_news t,t_app_user u where t.user_id=u.id and t.user_id in (select my_id from t_user_friend where your_id=#{userNewsVo.userId})  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+	</select>
+	<select id="yourUserNewsCount" resultType="long">
+		select count(t.id) from t_user_news t,t_app_user u where t.user_id=u.id and t.user_id in (select my_id from t_user_friend where your_id=#{userNewsVo.userId})
+	</select>
+	<select id="findUserNewsListCount" resultType="java.lang.Long">
+		select count(t.id) from t_user_news t,t_app_user u where t.user_id=u.id <include refid="find"></include>
+	</select>
+	<insert id="save" parameterType="userNewsVo">
+		insert into t_user_news (user_id,content, is_active, create_time,img_url) values (#{userId},#{content},#{isActive},now(),#{imgUrl})
+	</insert>
+	<update id="updateStatus">
+		update t_user_news set is_active=#{status} where id=#{id}
+	</update>
+	<update id="update">
+		update t_user_news set
+		user_id = #{userId},
+		content = #{content}
+		where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.UserNewsPlDAO">
+	<resultMap id="userNewsPlMap" type="com.dt.vo.UserNewsPlVo">
+		<id column="id" property="id"></id>
+		<result column="user_id" property="userId"></result>
+		<result column="content" property="content"></result>
+		<result column="user_news_id" property="userNewsId"></result>
+		<result column="is_active" property="isActive"></result>
+		<result column="create_time" property="createTime"></result>
+		<association property="userVo" javaType="com.dt.vo.AppUserVo">
+			<result column="name" property="name"></result>
+			<result column="face_img" property="faceImg"></result>
+			<result column="phone" property="phone"></result>
+			<result column="remark" property="remark"></result>
+		</association>
+	</resultMap>
+	<select id="getById" resultMap="userNewsPlMap" parameterType="long">
+		select t.*,u.name from t_user_news_pl t,t_app_user u where t.user_id=u.id and  id = #{id}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_user_news_pl where id = #{id}
+	</delete>
+	<select id="listPage" resultMap="userNewsPlMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark from t_user_news_pl t,t_app_user u where t.user_id=u.id <if test="id!=null">and t.user_news_id=#{id}</if> order by t.create_time desc limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="userNewsPlMap">
+		select t.*,u.name from t_user_news_pl t,t_app_user u where t.user_id=u.id
+	</select>
+	<select id="count" resultType="java.lang.Long">
+		select count(t.id) from t_user_news_pl t,t_app_user u where t.user_id=u.id <if test="id!=null">and t.user_news_id=#{id}</if>
+	</select>
+	<sql id="find">
+		<if test="userNewsPlVo.createTime!=null and userNewsPlVo.endTime!=null"> and t.create_time BETWEEN #{userNewsPlVo.createTime} AND #{userNewsPlVo.endTime}</if>
+		<if test="userNewsPlVo.userId!=null">and t.user_id=#{userNewsPlVo.userId}</if>
+		<if test="userNewsPlVo.userName!=null and userNewsPlVo.userName!=''">and u.name like concat('%${userNewsPlVo.userName}%')</if>
+		<if test="userNewsPlVo.content!=null and userNewsPlVo.content!=''">and t.content like concat('%${userNewsPlVo.content}%')</if>
+		<if test="userNewsPlVo.isActive!=null">and t.is_active like concat('%${userNewsPlVo.isActive}%')</if>
+        <if test="pageQuery.id!=null">and t.user_news_id=#{pageQuery.id}</if>
+	</sql>
+	<select id="findUserNewsPlList" resultMap="userNewsPlMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark from t_user_news_pl t,t_app_user u where t.user_id=u.id <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+	</select>
+	<select id="findUserNewsPlListCount" resultType="java.lang.Long">
+		select count(t.id) from t_user_news_pl t,t_app_user u where t.user_id=u.id <include refid="find"></include>
+	</select>
+	<insert id="save" parameterType="userNewsPlVo">
+		insert into t_user_news_pl (user_news_id,user_id,content, is_active, create_time) values (#{userNewsId},#{userId},#{content},#{isActive},now())
+	</insert>
+	<update id="updateStatus">
+		update t_user_news_pl set is_active=#{status} where id=#{id}
+	</update>
+	<update id="update">
+		update t_user_news_pl set
+		user_id = #{userId},
+		content = #{content}
+		where id = #{id}
+	</update>
+</mapper>

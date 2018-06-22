@@ -1,0 +1,56 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dt.dao.UserRoleDAO">
+	<resultMap id="userRole" type="userRoleVo"></resultMap>
+	<resultMap type="userRoleVo" id="userRoleMap">
+		<id property="id" column="id"></id>
+		<result column="create_time" property="createTime"></result>
+		<result column="is_active" property="isActive"></result>
+		<association property="roleVo" javaType="com.dt.vo.RoleVo">
+			<id property="id" column="roleId"></id>
+			<result column="title" property="title"></result>
+		</association>
+		<association property="userVo" javaType="com.dt.vo.UserVo">
+			<id property="id" column="userId"></id>
+			<result column="realname" property="realname"></result>
+		</association>
+	</resultMap>
+	<select id="getById" resultMap="userRole" parameterType="long">
+		select *  from t_user_role t where t.id = #{id}
+	</select>
+	<select id="getRole" resultMap="userRoleMap" parameterType="long">
+		select t.*,r.title from  t_user_role t,t_role r where t.role_id=r.id and t.user_id = #{userId}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_user_role where id = #{id}
+	</delete>
+	<select id="listPage" resultMap="userRoleMap">
+		select t.id,t.is_active,t.create_time,u.realname,r.title from t_user_role t,t_user u,t_role r where t.role_id=r.id and t.user_id=u.id order by u.create_time desc limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="userRoleMap">
+		select t.id,t.is_active,t.create_time,u.realname,r.title from t_user_role t,t_user u,t_role r where t.role_id=r.id and t.user_id=u.id
+	</select>
+	<select id="count" resultType="java.lang.Long">
+		select count(*) from t_user_role
+	</select>
+	<insert id="save" parameterType="userRoleVo">
+		insert into t_user_role ( user_id,role_id,is_active) values ( #{userId},#{roleId},#{isActive})
+	</insert>
+	<update id="updateStatus">
+		update t_user_role set is_active=#{status} where id=#{id}
+	</update>
+	<update id="update">
+		update t_user_role
+		<set>
+			<if test="userId!=0">
+				user_id = #{userId},
+			</if>
+			<if test="roleId!=0">
+				role_id = #{roleId},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioLookHistoryDAO">
+    <resultMap id="vedioLookHistoryMap" type="com.dt.vo.VedioLookHistoryVo">
+        <id column="id" property="id"></id>
+        <result column="user_id" property="userId"></result>
+        <result column="vedio_id" property="vedioId"></result>
+        <result column="vedio_section_id" property="vedioSectionId"></result>
+        <result column="last_time" property="lastTime"></result>
+        <result column="is_active" property="isActive"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="vedio_index" property="vedioIndex"></result>
+        <association property="userVo" javaType="com.dt.vo.AppUserVo">
+            <result column="name" property="name"></result>
+        </association>
+        <association property="vedioVo" javaType="com.dt.vo.VedioVo">
+            <result column="vtitle" property="title"></result>
+            <result column="sface_img" property="faceImg"></result>
+            <result column="vedio_type_id" property="vedioTypeId"></result>
+            <result column="is_last" property="isLast"></result>
+            <result column="is_vip" property="isVip"></result>
+            <result column="jishu" property="jishu"></result>
+            <result column="is_active" property="isActive"></result>
+            <result column="create_time" property="createTime"></result>
+            <result column="description" property="description"></result>
+        </association>
+        <association property="vedioSectionVo" javaType="com.dt.vo.VedioSectionVo">
+            <result column="stitle" property="title"></result>
+        </association>
+    </resultMap>
+    <select id="getById" resultMap="vedioLookHistoryMap" parameterType="long">
+        select t.*,u.name,v.title as vtitle,s.title as stitle from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id and t.id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio_look_history where id = #{id}
+    </delete>
+    <delete id="delete">
+        delete from t_vedio_look_history where user_id = #{userId} and vedio_id=#{vedioId}
+    </delete>
+    <select id="listPage" resultMap="vedioLookHistoryMap">
+        select t.*,u.name,v.title as vtitle,s.title as stitle from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id  order by t.create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="listAll" resultMap="vedioLookHistoryMap">
+        select * from t_vedio_look_history
+    </select>
+    <select id="findVedioLookHistory" resultMap="vedioLookHistoryMap">
+        select * from t_vedio_look_history where vedio_id=#{vedioId} and user_id=#{userId}
+    </select>
+    <select id="findVedioLookHistoryCount" resultType="int">
+        select count(*) from t_vedio_look_history where vedio_id=#{vedioId} and user_id=#{userId}
+    </select>
+    <sql id="find">
+        <if test="vedioLookHistoryVo.vedioId!=null">and t.vedio_id=#{vedioLookHistoryVo.vedioId}</if>
+        <if test="vedioLookHistoryVo.userName!=null">and u.name like concat('%${vedioLookHistoryVo.userName}%')</if>
+        <if test="vedioLookHistoryVo.vedioSectionId!=null">and t.vedio_section_id=#{vedioLookHistoryVo.vedioSectionId}</if>
+    </sql>
+    <select id="findVedioLookHistoryList" resultMap="vedioLookHistoryMap">
+        select t.*,u.name,v.title as vtitle,s.title as stitle from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+    </select>
+    <select id="findVedioLookHistoryCounts" resultType="long">
+        select count(t.id) from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id <include refid="find"></include>
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(t.id) from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id
+    </select>
+    <insert id="save" parameterType="vedioLookHistoryVo">
+        <selectKey keyProperty='id' resultType='long' order='AFTER'  >
+            select LAST_INSERT_ID();
+        </selectKey>
+        insert into t_vedio_look_history (user_id, vedio_id, vedio_section_id, last_time, is_active, create_time,vedio_index) values (#{userId}, #{vedioId}, #{vedioSectionId}, #{lastTime},#{isActive},#{createTime},#{vedioIndex})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio_look_history set is_active=#{status} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio_look_history set last_time=#{lastTime},vedio_section_id=#{vedioSectionId},create_time=now(),vedio_index=#{vedioIndex} where vedio_id=#{vedioId} and user_id=#{userId}
+    </update>
+    <select id="sevenVedioLookHistory" resultMap="vedioLookHistoryMap">
+        select t.*,u.name,v.title as vtitle,s.title as stitle,v.face_img as sface_img,v.is_active,v.create_time,v.create_time,v.is_last,v.is_vip,v.jishu,v.description,v.rate from t_vedio_look_history t,t_app_user u,t_vedio v,t_vedio_section s where t.user_id=u.id and t.vedio_id=v.id and t.vedio_section_id=s.id and t.create_time BETWEEN date_add(NOW(),interval -7 day) and NOW() and t.user_id=#{userId}
+    </select>
+</mapper>

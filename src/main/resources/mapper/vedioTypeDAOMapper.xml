@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioTypeDAO">
+    <resultMap id="vedioTypeMap" type="com.dt.vo.VedioTypeVo"></resultMap>
+    <resultMap id="select2VoMap" type="com.dt.vo.Select2Vo"></resultMap>
+    <sql id="search">
+        <if test="#{searchVal!=null} and #{searchVal!=''}">
+            and (title like concat('%${searchVal}%')
+            or description like concat ('%${searchVal}%')
+            or is_active like concat ('%${searchVal}%'))
+        </if>
+    </sql>
+    <select id="getTypeList" resultMap="select2VoMap">
+        select id,title as text from t_vedio_type  where is_active=0
+    </select>
+    <select id="getById" resultMap="vedioTypeMap" parameterType="long">
+        select * from t_vedio_type where id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio_type where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="vedioTypeMap">
+        select * from t_vedio_type where 1=1 <include refid="search"/> order by create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="listAll" resultMap="vedioTypeMap">
+        select * from t_vedio_type
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from t_vedio_type where 1=1 <include refid="search"/>
+    </select>
+    <insert id="save" parameterType="vedioTypeVo">
+        insert into t_vedio_type ( title,description,is_active,create_time) values ( #{title},#{description},#{isActive},#{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio_type set is_active=#{status} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio_type set
+                title = #{title},
+                description = #{description}
+        where id = #{id}
+    </update>
+</mapper>

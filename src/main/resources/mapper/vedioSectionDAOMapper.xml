@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioSectionDAO">
+    <resultMap id="vedioSectionMap" type="com.dt.vo.VedioSectionVo">
+    </resultMap>
+    <resultMap id="getSectionByVedio" type="com.dt.vo.Select2Vo"></resultMap>
+    <select id="getSectionList" resultMap="getSectionByVedio">
+        select id,title as text from t_vedio_section where vedio_id=#{vedioId} and is_active=0
+    </select>
+    <select id="getById" resultMap="vedioSectionMap" parameterType="long">
+        select *,(select title from t_vedio where t_vedio.id=t_vedio_section.vedio_id) as vedioName from t_vedio_section where id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio_section where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="vedioSectionMap">
+        select *,(select title from t_vedio where t_vedio.id=t_vedio_section.vedio_id) as vedioName from t_vedio_section order by create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="listAll" resultMap="vedioSectionMap">
+        select *,(select title from t_vedio where t_vedio.id=t_vedio_section.vedio_id) as vedioName from t_vedio_section
+    </select>
+    <select id="getList" resultMap="vedioSectionMap">
+        select * from t_vedio_section where vedio_id=#{id} order by episode
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from t_vedio_section
+</select>
+    <sql id="find">
+        <if test="vedioSectionVo.createTime!=null"> and t.create_time BETWEEN #{vedioSectionVo.createTime} AND #{vedioSectionVo.endTime}</if>
+        <if test="vedioSectionVo.vedioId!=null">and t.vedio_id=#{vedioSectionVo.vedioId}</if>
+        <if test="vedioSectionVo.title!=null">and t.title like concat('%${vedioSectionVo.title}%')</if>
+        <if test="vedioSectionVo.isVip!=null">and t.is_vip=#{vedioSectionVo.isVip}</if>
+        <if test="vedioSectionVo.isActive!=null">and t.is_active=#{vedioSectionVo.isActive}</if>
+        <if test="vedioSectionVo.max!=null and vedioSectionVo.min!=null">and t.look_times BETWEEN #{vedioSectionVo.min} AND #{vedioSectionVo.max}</if>
+    </sql>
+    <select id="findVedioSectionList" resultMap="vedioSectionMap">
+        select t.*,(select title from t_vedio where t_vedio.id=t.vedio_id) as vedioName from t_vedio_section t where 1=1 <include refid="find"></include> order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+    </select>
+    <select id="findVedioSectionCount" resultType="java.lang.Long">
+        select count(t.id) from t_vedio_section t where 1=1 <include refid="find"></include>
+    </select>
+    <insert id="save" parameterType="vedioSectionVo">
+        insert into t_vedio_section (vedio_id, title,episode ,url, look_times, is_vip, is_active, create_time) values (#{vedioId}, #{title},#{episode}, #{url}, #{lookTimes}, #{isVip}, #{isActive}, #{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio_section set is_active=#{status} where id=#{id}
+    </update>
+    <update id="updateVedio">
+        update t_vedio_section set url=#{url} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio_section set
+            vedio_id = #{vedioId},
+            title = #{title},
+            url = #{url},
+            look_times=#{lookTimes},
+            is_vip=#{isVip}
+        where id = #{id}
+    </update>
+</mapper>

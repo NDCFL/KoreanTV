@@ -1,0 +1,4 @@
+固定路径：rootPath = http://192.168.199.201:8080
+1、验证手机号是否存在
+rootPath+"/appUser/checkLogin"
+参数:String phone

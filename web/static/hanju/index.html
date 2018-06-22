@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" >  
+<title>韩剧</title>
+<link rel="stylesheet" type="text/css" href="css/hui.css" />
+<style>
+    #list li{width:50%; float:left; 0px;}
+    #list h1{font-size:14px;}
+    #list .hui-img-list-content{padding:5px; padding-bottom:10px;}
+</style>
+</head>
+<body background="#f4f5f6;">
+<div class="hui-wrap">
+    <div id="refreshContainer" class="hui-refresh hui-img-list" id="list2" style="padding:10px 5px;">
+       <ul id="list"></ul>
+    </div>
+</div>
+<script type="text/javascript" src="js/hui.js"></script>
+<script type="text/javascript" src="js/hui-refresh-load-more.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	var page = 1;
+	hui.refresh('#refreshContainer', refresh);
+	hui.loadMore(getMore);
+    var htmls = '<li>\n' +
+        '                <a onclick="info(~);">\n' +
+        '                    <img src="~" style="width:196px;height:282px"/>\n' +
+        '                    <div class="hui-img-list-content">\n' +
+        '                        <h1>~</h1>\n' +
+        '                        <p>~</p>\n' +
+        '                    </div>\n' +
+        '                </a>\n' +
+        '            </li>';
+	//加载更多
+	function getMore(){
+	    hui.postJSON(
+	        rootPath+'/vedio/vedioList',
+	        {
+	        	"pageSize":10,
+	        	"pageIndex":page
+	        },
+	        function(res){
+	        	var all = "";
+	            //判断加载完毕
+	            if(res.rows.length==0){
+	                hui.endLoadMore(true, '已经到头了...');
+	                return false;
+	            }
+	            for(var i = 0; i < res.rows.length; i++){
+	            	all = htmls.replace("~",res.rows[i].id).replace("~",res.rows[i].faceImg).replace("~",res.rows[i].title.toString().substr(0,4)+"...").replace("~",res.rows[i].description.toString().substr(0,10)+"...");
+	                $("#list").append(all);
+	            }
+	            page++;
+	            hui.endLoadMore();
+	        }
+	    );
+	}
+	//下拉刷新
+	function refresh(){
+	    hui.loading('加载中...');
+	    hui.postJSON(
+	        rootPath+'/vedio/vedioList',
+	        {
+	        	"pageSize":10,
+	        	"pageIndex":page
+	        },
+	        function(res){
+	            hui.closeLoading();
+	            var all = '';
+	            for(var i = 0; i < res.rows.length; i++){
+	           		all = all + htmls.replace("~",res.rows[i].id).replace("~",res.rows[i].faceImg).replace("~",res.rows[i].title.toString().substr(0,4)+"...").replace("~",res.rows[i].description.toString().substr(0,10)+"...");
+	            }
+	            page = 2;
+	            hui('#list').html(all);
+	            //结束刷新
+	            hui.endRefresh();
+	            //重置加载更多状态
+	            hui.resetLoadMore();
+	        },
+	        function(){
+	            hui.closeLoading();
+	            hui.upToast('连接服务器失败！');
+	            hui.endRefresh();
+	        }
+	    );
+	}
+	function info(val){
+		localStorage.removeItem("vedioId");
+		localStorage.setItem("vedioId",val);
+		location.href="info.html"
+	}
+</script>
+</body>
+</html>

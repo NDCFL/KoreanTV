@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioDAO">
+    <resultMap id="vedioMap" type="com.dt.vo.VedioVo"></resultMap>
+    <resultMap id="select2VosMap" type="com.dt.vo.Select2Vo"></resultMap>
+    <select id="getById" resultMap="vedioMap" parameterType="long">
+        select t.*,m.title as mTitle from t_vedio t,t_vedio_module m where t.vedio_module_id=m.id and t.id=#{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="vedioMap">
+        select t.*,m.title as mTitle from t_vedio t,t_vedio_module m where t.vedio_module_id=m.id order by id limit #{pageNo},#{pageSize}
+    </select>
+    <select id="getVedioList" resultMap="select2VosMap">
+        select id,title as text from t_vedio where is_active=0
+    </select>
+    <select id="listAll" resultMap="vedioMap">
+        select t.*,m.title as mTitle from t_vedio t,t_vedio_module m where t.vedio_module_id=m.id order by create_time desc
+    </select>
+    <sql id="find">
+        <if test="vedioVo.vedioModuleId!=null">and t.vedio_module_id=#{vedioVo.vedioModuleId}</if>
+        <if test="vedioVo.vedioTypeId!=null">and t.vedio_type_id like concat('%${vedioVo.vedioTypeId}%')</if>
+        <if test="vedioVo.title!=null">and t.title like concat('%${vedioVo.title}%')</if>
+        <if test="vedioVo.rate!=null">and t.rate like concat('%${vedioVo.rate}%')</if>
+        <if test="vedioVo.isVip!=null">and t.is_vip=#{vedioVo.isVip}</if>
+        <if test="vedioVo.isLast!=null">and t.is_last=#{vedioVo.isLast}</if>
+    </sql>
+    <select id="findVedioList" resultMap="vedioMap">
+        select t.*,m.title as mTitle from t_vedio t,t_vedio_module m where t.vedio_module_id=m.id  <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+    </select>
+    <select id="findVedioCount" resultType="java.lang.Long">
+        select count(t.id) from t_vedio t where 1=1 <include refid="find"></include>
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(id) from t_vedio
+    </select>
+    <insert id="save" parameterType="vedioVo">
+        <selectKey keyProperty="id" order="AFTER" resultType="long">
+            SELECT LAST_INSERT_ID() as id
+        </selectKey>
+        insert into t_vedio (title, description,area ,face_img, rate, vedio_module_id, vedio_type_id, jishu, is_vip, is_last, is_active, create_time,years) values (#{title}, #{description},#{area}, #{faceImg}, #{rate}, #{vedioModuleId}, #{vedioTypeId}, #{jishu}, #{isVip}, #{isLast}, #{isActive}, #{createTime},#{year})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio set is_active=#{status} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio set
+            title = #{title},
+            description = #{description},
+            face_img=#{faceImg},
+            rate=#{rate},
+            vedio_module_id=#{vedioModuleId},
+            vedio_type_id=#{vedioTypeId},
+            jishu=#{jishu},
+            is_vip=#{isVip},
+            is_last=#{isLast}
+        where id = #{id}
+    </update>
+</mapper>

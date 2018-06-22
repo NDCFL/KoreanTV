@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.DownHistoryDAO">
+    <resultMap id="downHistoryMap" type="com.dt.vo.DownHistoryVo">
+        <id column="id" property="id"></id>
+        <result column="user_id" property="userId"></result>
+        <result column="vedio_id" property="vedioId"></result>
+        <result column="vedio_section_id" property="vedioSectionId"></result>
+        <result column="is_active" property="isActive"></result>
+        <result column="create_time" property="createTime"></result>
+        <association property="vedioVo" javaType="com.dt.vo.VedioVo">
+            <result column="vtitle" property="title"></result>
+            <result column="current" property="current"></result>
+            <result column="description" property="description"></result>
+            <result column="face_img" property="faceImg"></result>
+            <result column="rate" property="rate"></result>
+            <result column="jishu" property="jishu"></result>
+            <result column="is_vip" property="isVip"></result>
+            <result column="is_last" property="isLast"></result>
+        </association>
+    </resultMap>
+    <resultMap id="downMap" type="com.dt.vo.DownHistoryVo">
+        <id column="id" property="id"></id>
+        <result column="user_id" property="userId"></result>
+        <result column="vedio_id" property="vedioId"></result>
+        <result column="vedio_section_id" property="vedioSectionId"></result>
+        <result column="is_active" property="isActive"></result>
+        <result column="create_time" property="createTime"></result>
+        <association property="userVo" javaType="com.dt.vo.AppUserVo">
+            <result column="name" property="name"></result>
+            <result column="face_img" property="faceImg"></result>
+        </association>
+        <association property="vedioVo" javaType="com.dt.vo.VedioVo">
+            <result column="vtitle" property="title"></result>
+            <result column="current" property="current"></result>
+            <result column="sface_img" property="faceImg"></result>
+            <result column="vedio_type_id" property="vedioTypeId"></result>
+            <result column="is_last" property="isLast"></result>
+            <result column="is_vip" property="isVip"></result>
+            <result column="jishu" property="jishu"></result>
+            <result column="is_active" property="isActive"></result>
+            <result column="create_time" property="createTime"></result>
+            <result column="description" property="description"></result>
+        </association>
+    </resultMap>
+    <resultMap id="sectionMap" type="com.dt.vo.VedioSectionVo">
+    </resultMap>
+    <select id="getById" resultMap="downHistoryMap" parameterType="long">
+        select t.*,v.title as vtitle,(select count(id) from t_down_history where t.vedio_id=t_down_history.vedio_id) as `current`,u.face_img,u.name,v.face_img as sface_img,v.is_active,v.create_time,v.create_time,v.is_last,v.is_vip,v.jishu,v.description,v.rate from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id and  t.id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_down_history where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="downMap">
+        select t.*,v.title as vtitle,(select count(id) from t_down_history where t.vedio_id=t_down_history.vedio_id) as `current`,u.face_img,u.name,v.face_img as sface_img,v.is_active,v.create_time,v.create_time,v.is_last,v.is_vip,v.jishu,v.description,v.rate  from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id   order by t.create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <sql id="find">
+        <if test="downHistoryVo.vedioId!=null">and t.vedio_id=#{downHistoryVo.vedioId}</if>
+        <if test="downHistoryVo.userName!=null">and u.name like concat('%${downHistoryVo.userName}%')</if>
+    </sql>
+    <select id="findDownHistoryList" resultMap="downMap">
+        select t.*,v.title as vtitle,(select count(id) from t_down_history where t.vedio_id=t_down_history.vedio_id) as `current`,u.face_img,u.name,v.face_img as sface_img,v.is_active,v.create_time,v.create_time,v.is_last,v.is_vip,v.jishu,v.description,v.rate  from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+    </select>
+    <select id="findDownHistoryListCount" resultType="java.lang.Long">
+        select count(t.id) from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id <include refid="find"></include>
+    </select>
+    <select id="getList" resultMap="downHistoryMap">
+        select t.*,v.title as vtitle,(select count(id) from t_down_history where t.vedio_id=t_down_history.vedio_id) as `current`,v.face_img as sface_img,v.is_active,v.create_time,v.create_time,v.is_last,v.is_vip,v.jishu,v.description,v.rate  from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id and  t.user_id=#{userId}  order by t.create_time desc
+    </select>
+    <select id="getSectionList" resultMap="sectionMap">
+        select t.* from t_vedio_section t where t.id in (select vedio_section_id from t_down_history d where d.vedio_id=#{vedioId} and d.user_id=#{userId})
+    </select>
+    <select id="listAll" resultMap="downHistoryMap">
+        select * from t_down_history
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(t.id) from t_down_history t,t_app_user u,t_vedio v where t.user_id=u.id and  t.vedio_id=v.id
+    </select>
+    <insert id="save" parameterType="downHistoryVo">
+        insert into t_down_history (user_id, vedio_id,vedio_section_id, is_active, create_time) values (#{userId}, #{vedioId}, #{vedioSectionId},#{isActive},#{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_down_history set is_active=#{status} where id=#{id}
+    </update>
+</mapper>

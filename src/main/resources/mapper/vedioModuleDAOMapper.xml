@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioModuleDAO">
+    <resultMap id="vedioModuleMap" type="com.dt.vo.VedioModuleVo"></resultMap>
+    <resultMap id="select2VoMap" type="com.dt.vo.Select2Vo"></resultMap>
+    <resultMap id="vedioVoListMap" type="com.dt.vo.VedioModuleVo">
+        <id column="id" property="id"></id>
+        <result column="title" property="title"></result>
+        <result column="img_url" property="imgUrl"></result>
+        <collection property="vedioVoList" ofType="com.dt.vo.VedioVo">
+            <id column="vid" property="id"></id>
+            <result column="vtitle" property="title"></result>
+            <result column="jishu" property="jishu"></result>
+            <result column="face_img" property="faceImg"></result>
+            <result column="vedio_type_id" property="vedioTypeId"></result>
+            <result column="is_last" property="isLast"></result>
+            <result column="is_vip" property="isVip"></result>
+            <result column="rate" property="rate"></result>
+            <result column="description" property="description"></result>
+        </collection>
+    </resultMap>
+    <sql id="search">
+        <if test="#{searchVal!=null} and #{searchVal!=''}">
+            and (title like concat('%${searchVal}%')
+            or description like concat ('%${searchVal}%')
+            or is_active like concat ('%${searchVal}%'))
+        </if>
+    </sql>
+    <select id="getList" resultMap="vedioVoListMap">
+        select t.title,t.id,t.img_url,v.jishu,v.id as vid,v.title as vtitle,v.face_img,v.vedio_type_id,v.is_last,v.rate,v.description from t_vedio_module t,t_vedio v  where t.id=v.vedio_module_id order by v.id
+    </select>
+    <select id="getModuleList" resultMap="select2VoMap">
+        select id,title as text from t_vedio_module  where is_active=0
+    </select>
+    <select id="getById" resultMap="vedioModuleMap" parameterType="long">
+        select * from t_vedio_module where id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio_module where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="vedioModuleMap">
+        select * from t_vedio_module where 1=1 <include refid="search"/> order by create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="listAll" resultMap="vedioModuleMap">
+        select * from t_vedio_module
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from t_vedio_module where 1=1 <include refid="search"/>
+    </select>
+    <insert id="save" parameterType="vedioModuleVo">
+        insert into t_vedio_module ( img_url,title,description,is_active,create_time,level) values (#{img_url}, #{title},#{description},#{isActive},#{createTime},#{level})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio_module set is_active=#{status} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio_module set
+                level = #{level},
+                title = #{title},
+                img_url=#{imgUrl},
+                description = #{description}
+        where id = #{id}
+    </update>
+</mapper>

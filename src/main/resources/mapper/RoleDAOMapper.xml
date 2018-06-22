@@ -1,0 +1,59 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dt.dao.RoleDAO">
+	<resultMap type="roleVo" id="roleMap">
+	</resultMap>
+	<resultMap type="select2Vo" id="roleIdAndTitleMap">
+	</resultMap>
+	<sql id="Base_Column_List">id, title,description,create_time,is_active</sql>
+	<select id="listByAccount" parameterType="string" resultType="roleVo">
+		<![CDATA[
+			select r.* from t_role r
+			join t_user_role ur on r.id = ur.role_id
+			join t_user u on u.id = ur.user_id and u.phone = #{account}
+		]]>
+	</select>
+	<select id="getById" resultMap="roleMap" parameterType="long">
+		select
+		<include refid="Base_Column_List"/>
+		from t_role where id = #{id}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_role where id = #{id}
+	</delete>
+	<select id="listPage" resultMap="roleMap">
+		select * from t_role limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="roleMap">
+		select * from t_role
+	</select>
+	<select id="getRoleIdAndTitle" resultMap="roleIdAndTitleMap">
+		select id,title as text from t_role
+	</select>
+	<select id="findByName" resultMap="roleMap" parameterType="string">
+		select * from t_role where title=#{title}
+	</select>
+	<select id="count" resultType="long">
+		select count(*) from t_role
+	</select>
+	<insert id="save" parameterType="roleVo">
+		insert into t_role ( title,description,is_active) values ( #{title},#{description},#{isActive})
+	</insert>
+	<update id="updateStatus">
+		update t_role set is_active=#{status} where id=#{id}
+	</update>
+	<update id="update">
+		update t_role
+		<set>
+			<if test="title!=null and title!=''">
+				title = #{title},
+			</if>
+			<if test="description!=null and description!=''">
+				description = #{description},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

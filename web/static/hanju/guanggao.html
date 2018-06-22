@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HUI</title>
+<link rel="stylesheet" type="text/css" href="css/hui.css" />
+</head>
+<body>
+<header class="hui-header">
+    <div id="hui-back"></div>
+    <h1>HUI 滚动公告</h1>
+</header>
+<div class="hui-wrap">
+    <div style="background:#FFF;height: 50px;" class="hui-flex">
+        <div class="hui-scroll-news" style="margin: 0px;height: 50px;" id="scrollnew1">
+            <div class="hui-scroll-news-items" style="height: 50px;"><img src="img/banner.png" style="height: 100%;width: 100%;" /></div>
+            <div class="hui-scroll-news-items" style="height: 50px;"><img src="img/banner.png" style="height: 100%;width: 100%;" /></div>
+            <div class="hui-scroll-news-items" style="height: 50px;"><img src="img/banner.png" style="height: 100%;width: 100%;" /></div>
+        </div>
+    </div>
+</div>
+<script src="js/hui.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+hui.scrollNews(scrollnew1, 2000);
+</script>
+</body>
+</html>

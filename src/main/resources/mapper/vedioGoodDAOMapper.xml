@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioGoodDAO">
+	<resultMap id="vedioGoodMap" type="com.dt.vo.VedioGoodVo">
+		<id column="id" property="id"></id>
+		<result column="user_id" property="userId"></result>
+		<result column="discuss_id" property="discussId"></result>
+		<result column="is_active" property="isActive"></result>
+		<result column="create_time" property="createTime"></result>
+		<association property="userVo" javaType="com.dt.vo.AppUserVo">
+			<result column="name" property="name"></result>
+			<result column="face_mg" property="faceImg"></result>
+			<result column="phone" property="phone"></result>
+			<result column="remark" property="remark"></result>
+		</association>
+	</resultMap>
+	<select id="getById" resultMap="vedioGoodMap" parameterType="long">
+		select t.*,u.name from t_vedio_good t,t_app_user u where t.user_id=u.id and  id = #{id}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_vedio_good where id = #{id}
+	</delete>
+	<delete id="delete">
+		delete from t_vedio_good where user_id = #{userId} and vedio_id=#{vedioId}
+	</delete>
+	<select id="listPage" resultMap="vedioGoodMap">
+		select t.*,u.name from t_vedio_good t,t_app_user u where t.user_id=u.id <if test="id!=null">and t.vedio_id=#{id}</if> order by t.create_time desc limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="vedioGoodMap">
+		select t.*,u.name from t_vedio_good t,t_app_user u where t.user_id=u.id
+	</select>
+	<select id="count" resultType="java.lang.Long">
+		select count(t.id) from t_vedio_good t,t_app_user u where t.user_id=u.id <if test="id!=null">and t.vedio_id=#{id}</if>
+	</select>
+	<sql id="find">
+		<if test="vedioGoodVo.createTime!=null and vedioGoodVo.endTime!=null"> and t.create_time BETWEEN #{vedioGoodVo.createTime} AND #{vedioGoodVo.endTime}</if>
+		<if test="vedioGoodVo.userId!=null">and t.user_id=#{vedioGoodVo.userId}</if>
+		<if test="vedioGoodVo.userName!=null and vedioGoodVo.userName!=''">and u.name like concat('%${vedioGoodVo.userName}%')</if>
+		<if test="vedioGoodVo.isActive!=null">and t.is_active like concat('%${vedioGoodVo.isActive}%')</if>
+		<if test="pageQuery.id!=null">and t.vedio_id=#{pageQuery.id}</if>
+	</sql>
+	<select id="findVedioGoodList" resultMap="vedioGoodMap">
+		select t.*,u.name,u.face_img,u.phone,u.remark from t_vedio_good t,t_app_user u where t.user_id=u.id <include refid="find"></include>  order by t.create_time desc limit #{pageQuery.pageNo},#{pageQuery.pageSize}
+	</select>
+	<select id="findVedioGoodListCount" resultType="java.lang.Long">
+		select count(t.id) from t_vedio_good t,t_app_user u where t.user_id=u.id <include refid="find"></include>
+	</select>
+	<insert id="save" parameterType="vedioGoodVo">
+		insert into t_vedio_good (user_id,discuss_id, is_active, create_time) values (#{userId},#{discussId},#{vedioId},#{isActive},now())
+	</insert>
+	<update id="updateStatus">
+		update t_vedio_good set is_active=#{status} where id=#{id}
+	</update>
+	<update id="update">
+		update t_vedio_good set
+		user_id = #{userId},
+		discuss_id = #{discussId}
+		where id = #{id}
+	</update>
+</mapper>

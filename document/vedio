@@ -1,0 +1,8 @@
+1、查询视频信息接口（分页查询，动态修改page的值）
+http://111.230.234.200:88/query.aspx?page=1
+2、查询电视剧详细信息
+http://111.230.234.200:88/detail.aspx?seasonId=3075
+3、视频播放地址
+http://139.199.200.20/meiju.aspx?episodeSid=101961&seasonId=11934
+//视频资源有问题
+4，

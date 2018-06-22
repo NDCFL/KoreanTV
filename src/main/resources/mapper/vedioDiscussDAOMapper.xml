@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VedioDiscussDAO">
+    <resultMap id="vedioDiscussMap" type="com.dt.vo.VedioDiscussVo">
+        <id column="id" property="id"></id>
+        <result column="user_id" property="userId"></result>
+        <result column="vedio_id" property="vedioId"></result>
+        <result column="vedio_section_id" property="vedioSectionId"></result>
+        <result column="content" property="content"></result>
+        <result column="is_active" property="isActive"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="cnt" property="cnt"></result>
+        <result column="goods" property="goods"></result>
+        <association property="userVo" javaType="com.dt.vo.AppUserVo">
+            <result column="name" property="name"></result>
+            <result column="face_img" property="faceImg"></result>
+        </association>
+        <association property="vedioVo" javaType="com.dt.vo.VedioVo">
+            <result column="vtitle" property="title"></result>
+        </association>
+        <!--<association property="vedioSectionVo" javaType="com.dt.vo.VedioSectionVo">-->
+            <!--<result column="stitle" property="title"></result>-->
+        <!--</association>-->
+    </resultMap>
+    <select id="getById" resultMap="vedioDiscussMap" parameterType="long">
+        select t.*,u.name,v.title as vtitle,u.face_img,(select count(*) from t_char where t_char.vedio_discuss_id=t.id) as cnt from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id  and t.id = #{id}
+    </select>
+    <delete id="removeById" parameterType="long">
+        delete from t_vedio_discuss where id = #{id}
+    </delete>
+    <select id="listPage" resultMap="vedioDiscussMap">
+        select t.*,u.name,v.title as vtitle,u.face_img,(select count(*) from t_char where t_char.vedio_discuss_id=t.id) as cnt,(select count(id) from t_vedio_good where discuss_id=t.id) as goods from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id <if test="id!=null"> and t.vedio_id=#{id}</if>   order by t.create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="findVedioList" resultMap="vedioDiscussMap">
+        select t.*,u.name,v.title as vtitle,u.face_img,(select count(*) from t_char where t_char.vedio_discuss_id=t.id) as cnt from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id  and t.vedio_id=#{id}  order by t.create_time desc
+    </select>
+    <select id="findVedioLists" resultMap="vedioDiscussMap">
+        select t.*,u.name,v.title as vtitle,u.face_img,(select count(*) from t_char where t_char.vedio_discuss_id=t.id) as cnt from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id  and t.vedio_section_id=#{vedioSectionId}  order by t.create_time desc
+    </select>
+   <select id="listAll" resultMap="vedioDiscussMap">
+        select * from t_vedio_discuss
+    </select>
+    <sql id="find">
+        <if test="vedioDiscussVo.vedioId!=null">and t.vedio_id=#{vedioDiscussVo.vedioId}</if>
+        <if test="vedioDiscussVo.userName!=null">and u.name like concat('%${vedioDiscussVo.userName}%')</if>
+        <if test="vedioDiscussVo.content!=null">and t.content like concat('%${vedioDiscussVo.content}%')</if>
+    </sql>
+    <select id="findVedioDiscussList" resultMap="vedioDiscussMap">
+        select t.*,u.name,v.title as vtitle,u.face_img,(select count(*) from t_char where t_char.vedio_discuss_id=t.id) as cnt from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id  <include
+            refid="find"></include>  order by t.create_time desc limit #{pageNo},#{pageSize}
+    </select>
+    <select id="findVedioDiscussCount" resultType="java.lang.Long">
+        select count(t.id) from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id   <include refid="find"></include>
+    </select>
+    <select id="count" resultType="java.lang.Long">
+        select count(t.id) from t_vedio_discuss t,t_app_user u,t_vedio v where t.user_id=u.id and t.vedio_id=v.id  <if test="id!=null"> and t.vedio_id=#{id}</if>
+    </select>
+    <insert id="save" parameterType="vedioDiscussVo">
+        insert into t_vedio_discuss (user_id, vedio_id, vedio_section_id, content, is_active, create_time) values (#{userId}, #{vedioId}, #{vedioSectionId}, #{content},#{isActive},#{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_vedio_discuss set is_active=#{status} where id=#{id}
+    </update>
+    <update id="update">
+        update t_vedio_discuss set
+                content = #{content}
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dt.dao.VerifcodeDAO">
+    <resultMap id="entityMap" type="com.dt.vo.Verifcode"></resultMap>
+    <select id="queryByCode" parameterType="string" resultType="com.dt.vo.Verifcode">
+        select * from t_verifcode  where  phone = #{phone} and addtime>=now() and status=0 order by  create_time limit 0,1
+    </select>
+    <delete id="delete" parameterType="String">
+        delete from t_verifcode where phone = #{phone}
+    </delete>
+    <insert id="save" parameterType="verifcode">
+        insert into t_verifcode (phone, code, msg,addtime,status,create_time) values ( #{phone}, #{code}, #{msg},date_add(#{addtime}, interval 30 minute),#{status},#{createTime})
+    </insert>
+    <update id="updateStatus">
+        update t_verifcode set status =#{status} where  id=#{id}
+    </update>
+    <update id="updateCodeStatus">
+        update t_verifcode set status =#{status} where  phone = #{phone} and addtime>=now() and status=0 order by create_time
+    </update>
+</mapper>

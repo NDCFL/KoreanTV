@@ -1,0 +1,84 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dt.dao.UserDAO">
+	<resultMap type="userVo" id="userMap"></resultMap>
+    <resultMap type="select2Vo" id="userIdAndNameMap">
+    </resultMap>
+	<sql id="Base_Column_List">id,</sql>
+	<select id="getByAccountPassword" resultType="userVo">
+		<![CDATA[
+			select * from t_user where password = #{password} and
+			(name = #{account} or phone = #{account}) and status=0
+		]]>
+	</select>
+	<select id="appLogin" resultType="userVo">
+		<![CDATA[
+			select * from t_user where password = #{passWord} and phone = #{phone}
+		]]>
+	</select>
+	<select id="getById" resultMap="userMap" parameterType="long">
+		select * from t_user where id = #{id}
+	</select>
+	<select id="getImg" resultType="string" parameterType="long">
+		select face_img from t_user where id = #{id}
+	</select>
+	<select id="checkLogin" resultType="int" parameterType="string">
+		select count(*) from t_user where name = #{name} or phone = #{phone} or realname = #{realname}
+	</select>
+	<select id="checkReg" resultType="int" parameterType="string">
+		select  count(*) from t_user where phone = #{phone}
+	</select>
+	<select id="findByPhone" resultMap="userMap" parameterType="string">
+		select * from t_user where phone = #{phone}
+	</select>
+	<delete id="removeById" parameterType="long">
+		delete from t_user where id = #{id}
+	</delete>
+	<select id="listPage" resultMap="userMap">
+		select * from t_user limit #{pageNo},#{pageSize}
+	</select>
+	<select id="listAll" resultMap="userMap">
+		select * from t_user
+	</select>
+	<select id="getUser" resultMap="userIdAndNameMap">
+		select id,realname as text from t_user
+	</select>
+	<select id="count" resultType="long">
+		select count(*) from t_user
+	</select>
+	<select id="getPassword" resultType="string" parameterType="long">
+		select password from t_user where id=#{id}
+	</select>
+    <select id="select2List" resultType="string" parameterType="long">
+        select id,realname from t_user
+    </select>
+	<insert id="save" parameterType="userVo">
+		<!--<selectKey keyProperty="id" order="AFTER" resultType="long">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>-->
+		insert into t_user (phone, password, name, realname, sex, age, qqopenid, wbopenid, wxopenid, face_img, status, create_time) values (#{phone}, #{password}, #{name}, #{realname}, #{sex}, #{age}, #{qqopenid}, #{wbopenid}, #{wxopenid}, #{faceImg}, #{status}, now())
+	</insert>
+	<update id="updateStatus">
+		update t_user set status=#{status} where id=#{id}
+	</update>
+	<update id="updatePwd">
+		update t_user set password=#{pwd} where id=#{id}
+	</update>
+	<update id="updateFaceImg">
+		update t_user set face_img=#{faceImg} where id=#{id}
+	</update>
+	<update id="updatePassWord">
+		update t_user set password=#{passWord} where phone=#{phone}
+	</update>
+	<update id="updatePhone">
+		update t_user set phone=#{phone} where id=#{id}
+	</update>
+	<update id="update">
+		update t_user set
+			phone = #{phone},
+			realname = #{realname}
+		where id = #{id}
+	</update>
+</mapper>
