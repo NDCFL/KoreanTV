@@ -38,6 +38,12 @@ public class TestController {
     @Resource
     private VedioSectionService vedioSectionService;
 
+    @RequestMapping("index")
+    public String index() {
+
+        return "swagger/dist/index";
+    }
+
     @RequestMapping("test")
     @ResponseBody
     public Message test() {

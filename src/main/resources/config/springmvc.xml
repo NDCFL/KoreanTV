@@ -7,6 +7,7 @@
 
     <context:component-scan base-package="com.dt" />
     <mvc:annotation-driven />
+    <bean class="com.dt.swagger.SwaggerConfig"/>
     <bean class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>
     <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
     <bean id="multipartResolver" class="com.dt.common.CommonsMultipartResolver">
@@ -38,6 +39,7 @@
     </bean>
 
     <mvc:resources location="/static/" mapping="/static/**"/>
+    <mvc:resources location="/swagger/" mapping="/swagger/**"/>
     <mvc:resources location="/upload/" mapping="/upload/**" />
     <mvc:resources mapping="/ueditor/**" location="/ueditor/" />
     <!--
